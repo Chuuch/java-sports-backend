@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: sportly-db
+    restart: always
+    environment:
+      POSTGRES_DB: sportly
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: sportly-app
+    depends_on:
+      - db
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/sportly
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET_KEY: your_secret_here
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:

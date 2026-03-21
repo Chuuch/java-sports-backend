@@ -1,14 +1,16 @@
-FROM eclipse-temurin:21-jdk-alpine AS build
+FROM maven:3.9.9-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 
-COPY .mvn/ .mvn
-COPY mvnw pom.xml ./
-RUN ./mvnw dependency:go-offline -B
+# Cache dependencies
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
 
+# Build app
 COPY src ./src
-RUN ./mvnw package -DskipTests
+RUN mvn package -DskipTests
 
-FROM eclipse-temurin:21-jr-alpine
+# Runtime image
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 RUN addgroup -S spring && adduser -S spring -G spring

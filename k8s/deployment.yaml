@@ -1,3 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sports-backend-config
+data:
+  SPRING_PROFILES_ACTIVE: "prod"
+  DB_URL: "jdbc:postgresql://postgres-service:5432/sportly"
+  DB_USERNAME: "postgres"
+  RESEND_FROM_EMAIL: "onboarding@resend.dev"
+  ZIPKIN_URL: "http://zipkin:9411/api/v2/spans"
+
+---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,7 +29,8 @@ spec:
     spec:
       containers:
         - name: backend
-          image: ghcr.io/Chuuch/sports-platform-backend:latest
+          image: ghcr.io/chuuch/sports-platform-backend:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           resources:
@@ -28,17 +42,45 @@ spec:
               memory: "512Mi"
           env:
             - name: SPRING_PROFILES_ACTIVE
-              value: "prod"
-            - name: RESEND_API_KEY
               valueFrom:
-                secretKeyRef:
-                  name: resend-secrets
-                  key: api-key
+                configMapKeyRef:
+                  name: sports-backend-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: DB_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: sports-backend-config
+                  key: DB_URL
+            - name: DB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: sports-backend-config
+                  key: DB_USERNAME
+            - name: RESEND_FROM_EMAIL
+              valueFrom:
+                configMapKeyRef:
+                  name: sports-backend-config
+                  key: RESEND_FROM_EMAIL
+            - name: ZIPKIN_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: sports-backend-config
+                  key: ZIPKIN_URL
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: db-secrets
-                  key: password
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_SECRET
+            - name: RESEND_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: resend-secret
+                  key: RESEND_API_KEY
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness

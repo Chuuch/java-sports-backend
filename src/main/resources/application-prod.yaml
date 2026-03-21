@@ -3,16 +3,21 @@ spring:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
   jpa:
     show-sql: false
-
+    hibernate:
+      ddl-auto: validate
 logging:
   structured:
     format: ecs
-
 app:
-  stripe:
-    api-key: ${STRIPE_API_KEY}
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET}
+      expiration: ${JWT_EXPIRATION:86400000}
+      refresh-token:
+        expiration: ${JWT_REFRESH_EXPIRATION:604800000}
   email:
     from: ${RESEND_FROM_EMAIL}
     resend:
@@ -24,11 +29,15 @@ management:
   Zipkin:
     tracing:
       endpoint: ${ZIPKIN_URL:http://zipkin:9411/api/v2/spans}
+  endpoint:
+    health:
+      probes:
+        enabled: true
   endpoints:
     web:
       exposure:
-        include: "health,Prometheus"
+        include: "health,prometheus"
   metrics:
     export:
-      Prometheus:
+      prometheus:
         enabled: true

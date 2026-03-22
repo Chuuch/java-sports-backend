@@ -14,7 +14,7 @@ logging:
 app:
   security:
     jwt:
-      secret-key: ${JWT_SECRET}
+      secret: ${JWT_SECRET}
       expiration: ${JWT_EXPIRATION:86400000}
       refresh-token:
         expiration: ${JWT_REFRESH_EXPIRATION:604800000}

@@ -1,6 +1,7 @@
 package com.sports.platform.http.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sports.platform.TestSupportConfiguration;
 import com.sports.platform.application.service.MatchService;
 import com.sports.platform.domain.model.Match;
 import com.sports.platform.http.dto.CreateMatchRequest;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.http.MediaType;
@@ -19,8 +21,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.junit.jupiter.api.BeforeEach;
 import com.resend.Resend;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,6 +34,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Import(TestSupportConfiguration.class)
 @SpringBootTest
 @ActiveProfiles("test")
 class MatchControllerTest {
@@ -52,14 +53,7 @@ class MatchControllerTest {
     @MockitoBean
     private Resend resend;
 
-    @MockitoBean
-    private KafkaTemplate<String, Object> kafkaTemplate;
-
-    @MockitoBean
-    private RedisConnectionFactory redisConnectionFactory;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @BeforeEach
     void setup() {
@@ -89,7 +83,7 @@ class MatchControllerTest {
     @DisplayName("Should create match when user is ADMIN")
     @WithMockUser(roles = "ADMIN")
     void shouldCreateMatchWhenAdmin() throws Exception {
-        CreateMatchRequest request = new CreateMatchRequest(UUID.randomUUID(), UUID.randomUUID(), LocalDateTime.now());
+        CreateMatchRequest request = new CreateMatchRequest(UUID.randomUUID(), UUID.randomUUID(), LocalDateTime.now().plusHours(1));
         MatchResponse response = new MatchResponse(
                 UUID.randomUUID(), request.homeTeamId(), request.awayTeamId(),
                 request.startTime(), Match.MatchStatus.LIVE, 0, 0
@@ -109,7 +103,7 @@ class MatchControllerTest {
     @DisplayName("Should return 403 when creating match as non-ADMIN")
     @WithMockUser(roles = "USER")
     void shouldReturn403WhenNotAdmin() throws Exception {
-        CreateMatchRequest request = new CreateMatchRequest(UUID.randomUUID(), UUID.randomUUID(), LocalDateTime.now());
+        CreateMatchRequest request = new CreateMatchRequest(UUID.randomUUID(), UUID.randomUUID(), LocalDateTime.now().plusHours(1));
 
         mockMvc.perform(post("/api/v1/matches")
                         .with(csrf())

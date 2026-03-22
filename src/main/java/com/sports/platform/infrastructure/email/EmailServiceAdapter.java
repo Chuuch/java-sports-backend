@@ -7,20 +7,15 @@ import com.resend.services.emails.model.CreateEmailResponse;
 import com.sports.platform.application.port.output.IEmailService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class EmailServiceAdapter implements IEmailService {
     private final Resend resend;
-
-    @Value("${app.email.from}")
-    private String fromEmail;
-
+    private final String fromEmail;
     private final Counter emailSuccessCounter;
     private final Counter emailFailureCounter;
 

@@ -1,6 +1,7 @@
 package com.sports.platform.http.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sports.platform.TestSupportConfiguration;
 import com.sports.platform.application.service.AuthService;
 import com.sports.platform.http.dto.AuthResponse;
 import com.sports.platform.http.dto.LoginRequest;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.http.MediaType;
@@ -18,8 +20,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.junit.jupiter.api.BeforeEach;
 import com.resend.Resend;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -27,6 +27,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Import(TestSupportConfiguration.class)
 @SpringBootTest
 @ActiveProfiles("test")
 class AuthControllerTest {
@@ -45,14 +46,7 @@ class AuthControllerTest {
     @MockitoBean
     private Resend resend;
 
-    @MockitoBean
-    private KafkaTemplate<String, Object> kafkaTemplate;
-
-    @MockitoBean
-    private RedisConnectionFactory redisConnectionFactory;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @BeforeEach
     void setup() {
